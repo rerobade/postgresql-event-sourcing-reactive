@@ -2,12 +2,14 @@ package com.example.eventsourcing.projection;
 
 import com.example.eventsourcing.dto.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
 @Table(name = "RM_ORDER")
 @RequiredArgsConstructor
 @Getter
@@ -28,12 +29,10 @@ public class OrderProjection implements Persistable<UUID>, Serializable {
     @Id
     private UUID id;
     private int version;
-    @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private UUID riderId;
     private BigDecimal price;
-    @ElementCollection
-    @CollectionTable(name = "RM_ORDER_ROUTE", joinColumns = @JoinColumn(name = "ORDER_ID"))
+    @Transient // needs to be mapped manually
     @ToString.Exclude
     private List<WaypointProjection> route = new ArrayList<>();
     private UUID driverId;

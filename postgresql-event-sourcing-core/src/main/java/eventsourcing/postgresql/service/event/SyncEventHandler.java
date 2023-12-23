@@ -4,12 +4,13 @@ import eventsourcing.postgresql.domain.Aggregate;
 import eventsourcing.postgresql.domain.event.Event;
 import eventsourcing.postgresql.domain.event.EventWithId;
 import jakarta.annotation.Nonnull;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface SyncEventHandler {
 
-    void handleEvents(List<EventWithId<Event>> events,
+    Mono<Void> handleEvents(List<EventWithId<Event>> events,
                       Aggregate aggregate);
 
     @Nonnull

@@ -1,0 +1,27 @@
+spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/postgres
+#    username: admin
+#    password: s3cr3t
+  r2dbc:
+    url: r2dbc:pool:postgresql://localhost:5432/postgres
+    username: admin
+    password: s3cr3t
+  flyway:
+    url: jdbc:postgresql://localhost:5432/postgres
+    user: admin
+    password: s3cr3t
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: localhost:9092
+event-sourcing:
+  subscriptions: postgres-channel
+#  subscriptions: polling
+  polling-subscriptions:
+    polling-initial-delay: PT5S
+    polling-interval: PT60S
+
+logging.level:
+  root: INFO
+  com.example.eventsourcing: DEBUG
+  eventsourcing: DEBUG

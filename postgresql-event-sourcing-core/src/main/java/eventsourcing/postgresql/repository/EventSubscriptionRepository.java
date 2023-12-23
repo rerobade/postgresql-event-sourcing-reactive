@@ -1,68 +1,65 @@
 package eventsourcing.postgresql.repository;
 
 import eventsourcing.postgresql.domain.event.EventSubscriptionCheckpoint;
+import io.r2dbc.spi.Row;
+import io.r2dbc.spi.RowMetadata;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Optional;
 
 @Transactional(propagation = Propagation.MANDATORY)
 @Repository
 @RequiredArgsConstructor
 public class EventSubscriptionRepository {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final DatabaseClient databaseClient;
 
-    public void createSubscriptionIfAbsent(String subscriptionName) {
-        jdbcTemplate.update("""
+    public Mono<Void> createSubscriptionIfAbsent(String subscriptionName) {
+        return databaseClient.sql("""
                         INSERT INTO ES_EVENT_SUBSCRIPTION (SUBSCRIPTION_NAME, LAST_TRANSACTION_ID, LAST_EVENT_ID)
                         VALUES (:subscriptionName, '0'::xid8, 0)
                         ON CONFLICT DO NOTHING
-                        """,
-                Map.of("subscriptionName", subscriptionName)
-        );
+                        """)
+                .bind("subscriptionName", subscriptionName)
+                .then();
     }
 
-    public Optional<EventSubscriptionCheckpoint> readCheckpointAndLockSubscription(String subscriptionName) {
-        return jdbcTemplate.query("""
+    public Mono<EventSubscriptionCheckpoint> readCheckpointAndLockSubscription(String subscriptionName) {
+        return databaseClient.sql("""
                         SELECT LAST_TRANSACTION_ID::text,
                                LAST_EVENT_ID
                           FROM ES_EVENT_SUBSCRIPTION
                          WHERE SUBSCRIPTION_NAME = :subscriptionName
                            FOR UPDATE SKIP LOCKED
-                        """,
-                Map.of("subscriptionName", subscriptionName),
-                this::toEventSubscriptionCheckpoint
-        ).stream().findFirst();
+                        """)
+                .bind("subscriptionName", subscriptionName)
+                .map(this::toEventSubscriptionCheckpoint)
+                .first();
     }
 
-    public boolean updateEventSubscription(String subscriptionName,
-                                           BigInteger lastProcessedTransactionId,
-                                           long lastProcessedEventId) {
-        int updatedRows = jdbcTemplate.update("""
+    public Mono<Boolean> updateEventSubscription(String subscriptionName,
+                                                 BigInteger lastProcessedTransactionId,
+                                                 long lastProcessedEventId) {
+        return databaseClient.sql("""
                         UPDATE ES_EVENT_SUBSCRIPTION
                            SET LAST_TRANSACTION_ID = :lastProcessedTransactionId::xid8,
                                LAST_EVENT_ID = :lastProcessedEventId
                          WHERE SUBSCRIPTION_NAME = :subscriptionName
-                        """,
-                Map.of(
-                        "subscriptionName", subscriptionName,
-                        "lastProcessedTransactionId", lastProcessedTransactionId.toString(),
-                        "lastProcessedEventId", lastProcessedEventId
-                ));
-        return updatedRows > 0;
+                        """)
+                .bind("subscriptionName", subscriptionName)
+                .bind("lastProcessedTransactionId", lastProcessedTransactionId.toString())
+                .bind("lastProcessedEventId", lastProcessedEventId
+                ).fetch().rowsUpdated().map(updatedRows -> updatedRows > 0L);
     }
 
-    private EventSubscriptionCheckpoint toEventSubscriptionCheckpoint(ResultSet rs, int rowNum) throws SQLException {
-        String lastProcessedTransactionId = rs.getString("LAST_TRANSACTION_ID");
-        long lastProcessedEventId = rs.getLong("LAST_EVENT_ID");
+    private EventSubscriptionCheckpoint toEventSubscriptionCheckpoint(Row row, RowMetadata rowMetadata) {
+        String lastProcessedTransactionId = row.get("LAST_TRANSACTION_ID", String.class);
+        Long lastProcessedEventId = row.get("LAST_EVENT_ID", Long.class);
         return new EventSubscriptionCheckpoint(new BigInteger(lastProcessedTransactionId), lastProcessedEventId);
     }
 }

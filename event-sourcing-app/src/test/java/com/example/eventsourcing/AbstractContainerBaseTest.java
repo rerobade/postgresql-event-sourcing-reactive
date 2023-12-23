@@ -21,9 +21,17 @@ abstract class AbstractContainerBaseTest {
 
     @DynamicPropertySource
     static void postgresProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.r2dbc.url", AbstractContainerBaseTest::getR2dbcUrl);
+        registry.add("spring.r2dbc.username", POSTGRES::getUsername);
+        registry.add("spring.r2dbc.password", POSTGRES::getPassword);
+        registry.add("spring.flyway.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.flyway.username", POSTGRES::getUsername);
+        registry.add("spring.flyway.password", POSTGRES::getPassword);
+        registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+    }
+
+    private static String getR2dbcUrl() {
+        return POSTGRES.getJdbcUrl().replace("jdbc", "r2dbc");
     }
 
     @DynamicPropertySource

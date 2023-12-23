@@ -28,7 +28,10 @@ public class ScheduledEventSubscriptionProcessor {
 
     private void processNewEvents(AsyncEventHandler eventHandler) {
         try {
-            eventSubscriptionProcessor.processNewEvents(eventHandler);
+            eventSubscriptionProcessor.processNewEvents(eventHandler)
+                    .doOnError(e -> log.warn("Failed to handle new events for subscription %s"
+                            .formatted(eventHandler.getSubscriptionName()), e))
+                    .block();
         } catch (Exception e) {
             log.warn("Failed to handle new events for subscription %s"
                     .formatted(eventHandler.getSubscriptionName()), e);

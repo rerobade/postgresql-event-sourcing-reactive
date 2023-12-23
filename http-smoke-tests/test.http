@@ -1,0 +1,40 @@
+###
+# @name place order
+POST http://localhost:8080/orders
+Content-Type: application/json
+Accept: application/json
+
+{
+  "riderId": "63770803-38f4-4594-aec2-4c74918f7165",
+  "price": "123.45",
+  "route": [
+    {
+      "address": "Kyiv, 17A Polyarna Street",
+      "lat": 50.51980052414157,
+      "lon": 30.467197278948536
+    },
+    {
+      "address": "Kyiv, 18V Novokostyantynivska Street",
+      "lat": 50.48509161169076,
+      "lon": 30.485170724431292
+    }
+  ]
+}
+
+> {%
+
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("OrderId option exists", function() {
+        client.assert(response.body.hasOwnProperty("orderId"), "Cannot find 'orderId' option in response");
+    });
+    client.log(request.body())
+    client.global.set("orderId", response.body.orderId);
+%}

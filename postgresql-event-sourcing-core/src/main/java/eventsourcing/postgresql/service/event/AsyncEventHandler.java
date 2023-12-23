@@ -3,10 +3,11 @@ package eventsourcing.postgresql.service.event;
 import eventsourcing.postgresql.domain.event.Event;
 import eventsourcing.postgresql.domain.event.EventWithId;
 import jakarta.annotation.Nonnull;
+import reactor.core.publisher.Mono;
 
 public interface AsyncEventHandler {
 
-    void handleEvent(EventWithId<Event> event);
+    Mono<Void> handleEvent(EventWithId<Event> event);
 
     @Nonnull
     String getAggregateType();
