@@ -20,7 +20,7 @@ public class PostgresChannelEventSubscriptionConfig {
     CommandLineRunner startListener() {
         return (args) -> {
             log.info("Starting to watch for new notifications in the queue...");
-            processor.listenForNotifications();
+            processor.start();
         };
     }
 }
