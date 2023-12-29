@@ -1,4 +1,4 @@
-# <a id="0"></a>Event Sourcing with PostgreSQL
+# <a id="0"></a>Reactive Event Sourcing with PostgreSQL
 
 - [Introduction](#1)
 - [Example domain](#2)
@@ -68,14 +68,15 @@ You can use PostgreSQL as an event store without additional frameworks or extens
 instead of setting up and maintaining a separate specialized database for event sourcing.
 
 This repository provides a reference implementation of an event-sourced system 
-that uses PostgreSQL as an event store built with Spring Boot.
-[Fork](https://github.com/eugene-khyst/postgresql-event-sourcing/fork) the repository and use it as a template for your projects.
+that uses PostgreSQL as an event store built with reactive Spring Boot.
+[Fork](https://github.com/rerobade/postgresql-event-sourcing-reactive/fork) the repository and use it as a template for your projects.
 Or clone the repository and run end-to-end tests to see how everything works together.
 
 ![PostgreSQL Logo](img/potgresql-logo.png)
 
 See also
 
+* [Event Sourcing with PostgresSQL Event Sourcing (non-reactive)](https://github.com/eugene-khyst/postgresql-event-sourcing)
 * [Event Sourcing with EventStoreDB](https://github.com/eugene-khyst/eventstoredb-event-sourcing)
 * [Event Sourcing with Kafka and ksqlDB](https://github.com/eugene-khyst/ksqldb-event-souring)
 

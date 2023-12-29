@@ -70,11 +70,14 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
   event-sourcing-app:
-    image: eugene-khyst/postgresql-event-sourcing:${project_version}
+    image: rerobade/postgresql-event-sourcing-reactive:${project_version}
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: s3cr3t
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/postgres
+      SPRING_R2DBC_USERNAME: admin
+      SPRING_R2DBC_PASSWORD: s3cr3t
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_FLYWAY_USER: admin
+      SPRING_FLYWAY_PASSWORD: s3cr3t
       SPRING_KAFKA_BOOTSTRAPSERVERS: kafka:29092
     ports:
       - "8080"

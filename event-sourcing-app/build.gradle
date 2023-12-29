@@ -48,6 +48,6 @@ tasks.named('test') {
 }
 
 jib {
-    to.image = "eugene-khyst/postgresql-event-sourcing:${project.version}"
+    to.image = "rerobade/postgresql-event-sourcing-reactive:${project.version}"
     from.image = "eclipse-temurin:21-jre"
 }
